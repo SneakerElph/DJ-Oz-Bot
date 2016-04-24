@@ -2,8 +2,9 @@
 
 
 require 'discordrb'
-$current_voice_channel = 171156311231299585 #should move to config file
-$bot = Discordrb::Commands::CommandBot.new token: 'MTcxMzY0ODY2MzgzMTUxMTA2.CfWbtw.YtPwpGO0FYqyd0tJEqKrpw2kV6A', application_id: 171364652884819968, prefix: '?' #should move all this to config file as well
+require './config.rb'
+$current_voice_channel = ENV['current_voice_channel'] #should move to config file
+$bot = Discordrb::Commands::CommandBot.new token: ENV['discord_token'], application_id: ENV['application_id'], prefix: ENV['prefix'] #should move all this to config file as well
 def play_song(event)
 	filelist = Dir.entries('.')
 #get those damn things out of here
@@ -26,6 +27,7 @@ def play_song(event)
 #AW YEAH PLAY IT BABYYYYYYYYYYYYY
 	#event.voice.play_io(open(file_to_play))
 	event.voice.play_file(file_to_play)
+	#event.voice.play_stream(file_to_play)
 	event.voice.stop_playing
 
 #afterwards remove what's currently being played.
@@ -77,7 +79,7 @@ $bot.command(:pandora) do |event|
 end
 
 $bot.command(:botrename) do |event|
-	$bot.profile.username = "Pandora"
+	$bot.profile.username = ENV['pandorabot_name']
 	event.respond "Bot's name is now #{$bot.profile.username}"
 	nil
 end
