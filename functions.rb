@@ -18,10 +18,10 @@ def play_newest_file(event)
   #Hopefully we don't play songs/artists with actual underscores in their names or SHIT WILL GET CRAZY INACCURATE YO
 	 $bot.game=(file_to_play.gsub(".m4a" , "").gsub("_", " "))
   #tell the server we're doing something
-	 event.respond "Now Playing: **#{file_to_play.gsub(".m4a", "").gsub("_", " ")}** up in here"
+	 event.respond "Now Playing: **#{file_to_play.gsub(".m4a", "").gsub("_", " ")}**"
   #AW YEAH PLAY IT BABYYYYYYYYYYYYY
   	event.voice.play_file(file_to_play)
-    file_to_play.delete
+    File.delete(file_to_play)
   #afterwards remove what's currently being played.
 	 $bot.game=("Nothing.")
 end
