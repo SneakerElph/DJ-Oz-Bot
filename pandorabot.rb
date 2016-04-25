@@ -6,28 +6,17 @@ require './config.rb'
 require './functions.rb'
 
 
+$root_dir=Dir.pwd
 $current_voice_channel = ENV['current_voice_channel']
 $bot = Discordrb::Commands::CommandBot.new token: ENV['discord_token'], application_id: ENV['application_id'], prefix: ENV['prefix']
 
-$bot.command(:ping) do |event|
-	 username = event.user.name
-	 m = event.respond 'Pong! Check these channels and ID\'s'
-	 puts (username)
+$bot.command(:channels) do |event|
+	 event.respond 'Pong! Check these channels and ID\'s'
 	 server_channels = event.server.channels
 	 for i in server_channels
 		 event.respond "#{i.name}: #{i.id}'"
 	 end
-	 #m.edit "Pong! User ID is #{username}."
 	 nil
-end
-
-$bot.command(:play) do |event|
-	file = "piano2.wav"
-	voicebot = $bot.voice_connect($current_voice_channel)
-	event.respond "Aw shit I'm playing #{file} motherfucker"
-	event.voice.play_io(open(file))
-	voicebot.destroy
-	nil
 end
 
 $bot.command(:pause) do |event|
@@ -46,11 +35,16 @@ $bot.command(:stop) do |event|
 	nil
 end
 
-$bot.command(:pandora) do |event|
+$bot.command(:playnewest) do |event|
 	$songplaying = true
+	Dir.chdir("#{$root_dir}/mp3")
 	until $songplaying == false do
 			play_newest_file(event)
 		end
+end
+
+$bot.command(:startpandora) do |event|
+	start_pianobarfly(event)
 end
 
 $bot.command(:botrename) do |event|
@@ -59,7 +53,19 @@ $bot.command(:botrename) do |event|
 	nil
 end
 
-Dir.chdir('mp3')
+$bot.command(:stoppandora) do |event|
+	stop_pianobarfly(event)
+end
+
+$bot.command(:pandora) do |event|
+	start_pianobarfly(event)
+	sleep 5
+	$songplaying = true
+	Dir.chdir("#{$root_dir}/mp3")
+	until $songplaying = false do
+		play_newest_file(event)
+	end
+end
 
 #RUN THE BOT
 $bot.run
