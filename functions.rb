@@ -36,3 +36,20 @@ def stop_pianobarfly(event)
   $pianobarfly.print 'q'
   event.respond "Pianobarfly stopped."
 end
+
+def change_station(event)
+  puts "#{$pianobarfly.readlines}"
+  $pianobarfly.print 's'
+end
+
+def write_pianobar_config()
+  File.delete("pianobarconfig")
+    pianobarflyconfigfile = File.new("pianobarconfig", "w+")
+      pianobarflyconfigfile.puts("user = #{ENV['pandora_username']}")
+      pianobarflyconfigfile.puts("password = #{ENV['pandora_password']}")
+      pianobarflyconfigfile.puts("audio_format = #{ENV['pandora_audio_format']}")
+      pianobarflyconfigfile.puts("autostart_station = #{ENV['pandora_station_id']}")
+      pianobarflyconfigfile.puts("tls_fingerprint = #{ENV['pandora_tls_fingerprint']}")
+      pianobarflyconfigfile.puts("audio_file_name = #{ENV['pandora_audio_file_name']}")
+  pianobarflyconfigfile.close
+end

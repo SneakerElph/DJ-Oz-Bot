@@ -29,7 +29,7 @@ $bot.command(:resume) do |event|
 	nil
 end
 
-$bot.command(:stop) do |event|
+$bot.command(:stop) do |event|7y6t54
 	event.voice.stop_playing
 	$songplaying = false
 	nil
@@ -55,6 +55,7 @@ end
 
 $bot.command(:stoppandora) do |event|
 	stop_pianobarfly(event)
+	$songplaying == false
 end
 
 $bot.command(:pandora) do |event|
@@ -62,9 +63,17 @@ $bot.command(:pandora) do |event|
 	sleep 5
 	$songplaying = true
 	Dir.chdir("#{$root_dir}/mp3")
-	until $songplaying = false do
+	until $songplaying == false do
 		play_newest_file(event)
 	end
+end
+
+$bot.command(:changestation) do |event|
+	change_station(event)
+end
+
+$bot.command(:writeconfig) do |event|
+	write_pianobar_config()
 end
 
 #RUN THE BOT
