@@ -27,9 +27,20 @@ def play_newest_file(event)
 end
 
 def start_pianobarfly(event)
-  Dir.chdir("#{$root_dir}")
-  $pianobarfly = IO.popen("pianobarfly", 'r+')
-  event.respond "Starting Pianobarfly..."
+	#check if pianobarfly is in our current folder
+	Dir.chdir("#{$root_dir}")
+	filelist = Dir.entries ('.')
+	if filelist.include?('pianobarfly')
+		puts "found Pianobarfly in current directory"
+		write_pianobar_config()
+		$pianobarfly = IO.popen("./pianobarfly", 'r+')
+		event.respond "Starting Pianobarfly..."
+	else
+		puts "didn't find Pianobarfly in current directory, playing from \$PATH"
+		write_pianobar_config()
+	  $pianobarfly = IO.popen("pianobarfly", 'r+')
+	  event.respond "Starting Pianobarfly..."
+	end
 end
 
 def stop_pianobarfly(event)
@@ -43,8 +54,8 @@ def change_station(event)
 end
 
 def write_pianobar_config()
-  File.delete("pianobarconfig")
-    pianobarflyconfigfile = File.new("pianobarconfig", "w+")
+  #File.delete("pianobarconfig")
+    pianobarflyconfigfile = File.new("#{Dir.home}/.config/pianobarfly/config", "w+")
       pianobarflyconfigfile.puts("user = #{ENV['pandora_username']}")
       pianobarflyconfigfile.puts("password = #{ENV['pandora_password']}")
       pianobarflyconfigfile.puts("audio_format = #{ENV['pandora_audio_format']}")
