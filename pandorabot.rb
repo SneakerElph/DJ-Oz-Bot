@@ -29,7 +29,7 @@ $bot.command(:resume) do |event|
 	nil
 end
 
-$bot.command(:stop) do |event|7y6t54
+$bot.command(:stop) do |event|
 	event.voice.stop_playing
 	$songplaying = false
 	nil
@@ -75,6 +75,8 @@ end
 $bot.command(:writeconfig) do |event|
 	write_pianobar_config()
 end
+
+	puts "Invite URL = #{$bot.invite_url}"
 
 #RUN THE BOT
 $bot.run
