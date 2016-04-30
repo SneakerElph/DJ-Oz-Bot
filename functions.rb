@@ -1,4 +1,7 @@
 require 'discordrb'
+require 'youtube-dl.rb'
+
+$playlist = array.new
 
 def play_newest_file(event)
 	filelist = Dir.entries('.')
@@ -63,4 +66,13 @@ def write_pianobar_config()
       pianobarflyconfigfile.puts("tls_fingerprint = #{ENV['pandora_tls_fingerprint']}")
       pianobarflyconfigfile.puts("audio_file_name = #{ENV['pandora_audio_file_name']}")
   pianobarflyconfigfile.close
+end
+def download_youtube(url)
+	$youtubefilename = url.gsub("https://www.youtube.com/watch?v=", "")
+	YoutubeDL.download url, output: "#{$youtubefilename}.mp4"
+end
+
+def add_to_playlist(file)
+	$playlist.push(file)
+	puts $playlist
 end
