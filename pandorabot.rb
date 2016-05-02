@@ -76,6 +76,38 @@ $bot.command(:writeconfig) do |event|
 	write_pianobar_config()
 end
 
+$bot.command(:youtube) do |event, text|
+	download_youtube(text)
+end
+
+$bot.command(:playplaylist) do |event|
+	Dir.chdir("#{$root_dir}/mp3")
+	play_playlist(event)
+end
+
+$bot.command(:playmusic) do |event|
+	#check if there's stuff in playlist folder
+	#if not, start pianobarfly and play pandora
+	#after every song check playlist folder again
+
+
+	$musicplaying = true
+	until $musicplaying == false
+		isfull = check_playlist_folder(event)
+		if isfull == true
+			play_playlist(event)
+		else
+			 start_pianobarfly(event)
+			 sleep 5
+			 $songplaying = true
+			 Dir.chdir("#{$root_dir}/mp3")
+			 until $songplaying == false do
+				 play_newest_file(event)
+			 end
+	 	end
+	end
+end
+
 	puts "Invite URL = #{$bot.invite_url}"
 
 #RUN THE BOT

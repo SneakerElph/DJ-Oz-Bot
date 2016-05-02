@@ -1,13 +1,14 @@
 require 'discordrb'
 require 'youtube-dl.rb'
 
-$playlist = array.new
+$playlist = Array.new
 
 def play_newest_file(event)
 	filelist = Dir.entries('.')
   #get those damn things out of here
   	filelist.delete(".")
   	filelist.delete("..")
+		filelist.delete(".DS_Store")
   #let's figure out which file is newest in here, since that's the song that pianobarfly is likely currently playing
 	 sorted_list = filelist.sort_by {|filename| File.ctime(filename)}
   #This list is backwards, sort the other way plz!
@@ -68,11 +69,41 @@ def write_pianobar_config()
   pianobarflyconfigfile.close
 end
 def download_youtube(url)
-	$youtubefilename = url.gsub("https://www.youtube.com/watch?v=", "")
-	YoutubeDL.download url, output: "#{$youtubefilename}.mp4"
+	Dir.chdir("#{$root_dir}/playlist")
+	youtubefilename = url.gsub("https://www.youtube.com/watch?v=", "")
+	YoutubeDL.download url, output: "#{youtubefilename}"
+	add_to_playlist("#{youtubefilename}")
 end
 
 def add_to_playlist(file)
 	$playlist.push(file)
-	puts $playlist
+	#event.respond "#{$playlist}"
+end
+
+def play_playlist(event)
+	Dir.chdir("#{$root_dir}/playlist")
+	$playlistplaying = true
+	until $playlistplaying == false do
+		isfull = check_playlist_folder(event)
+		if isfull == true
+			play_newest_file(event)
+			else
+			$playlistplaying = false
+		end
+	end
+end
+
+def check_playlist_folder(event)
+	Dir.chdir("#{$root_dir}/playlist")
+	playlist = Dir.entries(".")
+	playlist.delete(".")
+	playlist.delete("..")
+	playlist.delete(".DS_Store")
+	if playlist.empty? == false
+		puts "folder has stuff!"
+		return true
+	else
+		puts "folder doesn't have stuff!"
+		return false
+	end
 end
