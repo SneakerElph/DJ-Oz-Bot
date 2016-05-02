@@ -4,6 +4,7 @@
 require 'discordrb'
 require './config.rb'
 require './functions.rb'
+require './classes.rb'
 
 
 $root_dir=Dir.pwd
@@ -108,6 +109,12 @@ $bot.command(:playmusic) do |event|
 	end
 end
 
+$bot.command(:youtubeobject) do |event, text|
+	youtube_to_object(text)
+end
+$bot.command(:playobject) do |event|
+	$songObject.play(event)
+end
 	puts "Invite URL = #{$bot.invite_url}"
 
 #RUN THE BOT
