@@ -111,10 +111,25 @@ end
 
 $bot.command(:youtubeobject) do |event, text|
 	youtube_to_object(text)
+	event.respond "Added to playlist."
 end
 $bot.command(:playobject) do |event|
-	$songObject.play(event)
+	$playlist.play(event)
+	nil
 end
+
+$bot.command(:list) do |event|
+	if $playlist.entries.empty?
+		event.respond "Nothing in the list."
+	else
+			for e in $playlist.entries do
+				event.respond "#{e.name}"
+			end
+		end
+
+	nil
+end
+$playlist = Playlist.new
 	puts "Invite URL = #{$bot.invite_url}"
 
 #RUN THE BOT

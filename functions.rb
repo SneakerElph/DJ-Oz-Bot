@@ -112,5 +112,6 @@ def youtube_to_object(url)
 	Dir.chdir ("#{$root_dir}/playlist")
 	filename = url.gsub("https://www.youtube.com/watch?v=", "")
 	YoutubeDL.download url, output: "#{filename}"
-	$songObject = Song.new("name", "artist", "length", "#{filename}", "youtube")
+	$songObject = Song.new("#{filename}", "artist", "length", "#{filename}", "youtube")
+	$playlist.entries.push($songObject)
 end
