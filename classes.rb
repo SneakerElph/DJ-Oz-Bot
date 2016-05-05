@@ -12,9 +12,13 @@ class Song
     def play(event)
       $bot.game=("#{@name} by #{@artist}")
       voicebot = $bot.voice_connect($current_voice_channel)
-      @fullfilename = Dir["#{@filename}*"]
-      event.respond "Now Playing: #{@name} by #{@artist}. Filename: #{@fullfilename[0]}"
-      event.voice.play_file(@fullfilename[0])
+      #event.respond "Now Playing: #{@name} [#{Time.at(@length).utc.strftime("%M:%S")}]. Filename: #{@filename}"
+      event.respond "Now Playing: #{@name}. Filename: #{@filename}"
+      event.voice.play_file("#{@filename}")
+    end
+    def delete(event)
+      File.delete("#{@filename}")
+      puts "deleting #{@filename}"
     end
 end
 
@@ -27,6 +31,7 @@ class Playlist
     voicebot = $bot.voice_connect($current_voice_channel)
     for entry in @entries do
       entry.play(event)
+      entry.delete(event)
       @entries.delete_at(0)
     end
   end

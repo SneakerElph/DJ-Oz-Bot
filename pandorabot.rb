@@ -5,11 +5,14 @@ require 'discordrb'
 require './config.rb'
 require './functions.rb'
 require './classes.rb'
+require 'yt'
 
 
+Yt.configuration.api_key = "AIzaSyBN1naP86mILKIrtuazW75JGB4wpS2nSMw"
 $root_dir=Dir.pwd
 $current_voice_channel = ENV['current_voice_channel']
 $bot = Discordrb::Commands::CommandBot.new token: ENV['discord_token'], application_id: ENV['application_id'], prefix: ENV['prefix']
+
 
 $bot.command(:channels) do |event|
 	 event.respond 'Pong! Check these channels and ID\'s'
@@ -33,6 +36,7 @@ end
 $bot.command(:stop) do |event|
 	event.voice.stop_playing
 	$songplaying = false
+	$musicplaying = false
 	nil
 end
 
@@ -94,24 +98,28 @@ $bot.command(:playmusic) do |event|
 
 	$musicplaying = true
 	until $musicplaying == false
-		isfull = check_playlist_folder(event)
-		if isfull == true
-			play_playlist(event)
+		if $playlist.entries.empty? == false
+				$playlist.play(event)
 		else
-			 start_pianobarfly(event)
-			 sleep 5
-			 $songplaying = true
-			 Dir.chdir("#{$root_dir}/mp3")
-			 until $songplaying == false do
-				 play_newest_file(event)
-			 end
-	 	end
-	end
+				event.respond "Nothing Queued,"
+				 start_pianobarfly(event)
+				 sleep 5
+				 #Dir.chdir("#{$root_dir}/mp3")
+				 $pandoraplaying = true
+				 until $pandoraplaying == false do
+					 play_newest_file(event, "mp3")
+					 if $playlist.entries.empty? == false
+						 stop_pianobarfly(event)
+						 $pandoraplaying = false
+					 end
+				 end
+		 	end
+		end
 end
 
 $bot.command(:youtubeobject) do |event, text|
 	youtube_to_object(text)
-	event.respond "Added to playlist."
+	event.respond "Added #{$playlist.entries.last.name} [#{$playlist.entries.last.length}] to playlist."
 end
 $bot.command(:playobject) do |event|
 	$playlist.play(event)

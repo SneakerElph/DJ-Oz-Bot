@@ -1,16 +1,17 @@
 require 'discordrb'
 require 'youtube-dl.rb'
+require 'yt'
 
 $playlist = Array.new
 
-def play_newest_file(event)
-	filelist = Dir.entries('.')
+def play_newest_file(event, directory)
+	filelist = Dir.entries("#{$root_dir}/#{directory}")
   #get those damn things out of here
   	filelist.delete(".")
   	filelist.delete("..")
 		filelist.delete(".DS_Store")
   #let's figure out which file is newest in here, since that's the song that pianobarfly is likely currently playing
-	 sorted_list = filelist.sort_by {|filename| File.ctime(filename)}
+	 sorted_list = filelist.sort_by {|filename| File.ctime("#{$root_dir}/#{directory}/#{filename}")}
   #This list is backwards, sort the other way plz!
   	sorted_list.reverse!
   	file_to_play = sorted_list[0]
@@ -24,8 +25,8 @@ def play_newest_file(event)
   #tell the server we're doing something
 	 event.respond "Now Playing: **#{file_to_play.gsub(".m4a", "").gsub("_", " ")}**"
   #AW YEAH PLAY IT BABYYYYYYYYYYYYY
-  	event.voice.play_file(file_to_play)
-    File.delete(file_to_play)
+  	event.voice.play_file("#{$root_dir}/#{directory}/#{file_to_play}")
+    #File.delete(file_to_play)
   #afterwards remove what's currently being played.
 	 $bot.game=("Nothing.")
 end
@@ -94,8 +95,7 @@ def play_playlist(event)
 end
 
 def check_playlist_folder(event)
-	Dir.chdir("#{$root_dir}/playlist")
-	playlist = Dir.entries(".")
+	playlist = Dir.entries("#{$root_dir}/playlist")
 	playlist.delete(".")
 	playlist.delete("..")
 	playlist.delete(".DS_Store")
@@ -109,9 +109,11 @@ def check_playlist_folder(event)
 end
 
 def youtube_to_object(url)
-	Dir.chdir ("#{$root_dir}/playlist")
-	filename = url.gsub("https://www.youtube.com/watch?v=", "")
-	YoutubeDL.download url, output: "#{filename}"
-	$songObject = Song.new("#{filename}", "artist", "length", "#{filename}", "youtube")
+	#Dir.chdir ("#{$root_dir}/playlist")
+	youtubeVideo = Yt::Video.new url: url
+	videoid = url.gsub("https://www.youtube.com/watch?v=", "")
+	YoutubeDL.download url, output: "#{$root_dir}/playlist/#{videoid}"
+	filename = Dir["#{$root_dir}/playlist/#{videoid}*"]
+	$songObject = Song.new("#{youtubeVideo.title}", "artist", "#{Time.at(youtubeVideo.duration).utc.strftime("%M:%S")}", "#{filename[0]}", "youtube")
 	$playlist.entries.push($songObject)
 end
