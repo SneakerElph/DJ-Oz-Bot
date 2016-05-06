@@ -3,16 +3,25 @@
 
 require 'discordrb'
 require './config.rb'
-require './functions.rb'
 require './classes.rb'
 require 'yt'
+require 'youtube-dl.rb'
 
+def youtube_to_object(event, url)
+	#Dir.chdir ("#{$root_dir}/playlist")
+	youtubeVideo = Yt::Video.new url: url
+	videoid = url.gsub("https://www.youtube.com/watch?v=", "")
+	YoutubeDL.download url, output: "#{$root_dir}/playlist/#{videoid}"
+	filename = Dir["#{$root_dir}/playlist/#{videoid}*"]
+	songObject = Song.new("#{youtubeVideo.title}", "artist", "#{Time.at(youtubeVideo.duration).utc.strftime("%M:%S")}", "#{filename[0]}", "youtube", "#{event.author.name}")
+	$playlist.add(songObject)
+end
 
 Yt.configuration.api_key = "AIzaSyBN1naP86mILKIrtuazW75JGB4wpS2nSMw"
 $root_dir=Dir.pwd
 $current_voice_channel = ENV['current_voice_channel']
 $bot = Discordrb::Commands::CommandBot.new token: ENV['discord_token'], application_id: ENV['application_id'], prefix: ENV['prefix']
-
+$pandora = Pandora.new
 
 $bot.command(:channels) do |event|
 	 event.respond 'Pong! Check these channels and ID\'s'
@@ -37,6 +46,12 @@ $bot.command(:stop) do |event|
 	event.voice.stop_playing
 	$songplaying = false
 	$musicplaying = false
+	if $pandora.running == true
+		$pandora.stop(event)
+		$pandora.running = false
+		$pandora.playing = false
+	end
+
 	nil
 end
 
@@ -49,7 +64,17 @@ $bot.command(:playnewest) do |event|
 end
 
 $bot.command(:startpandora) do |event|
-	start_pianobarfly(event)
+	$pandora.writeconfig(event)
+	$pandora.start(event)
+	nil
+end
+
+$bot.command(:playpandora) do |event|
+	if $pandora.running == true
+		$pandora.play(event)
+	else
+		event.respond "Pianobarfly isn't running. Something went wrong. You probably didn't start it."
+	end
 end
 
 $bot.command(:botrename) do |event|
@@ -59,8 +84,7 @@ $bot.command(:botrename) do |event|
 end
 
 $bot.command(:stoppandora) do |event|
-	stop_pianobarfly(event)
-	$songplaying == false
+	$pandora.stop(event)
 end
 
 $bot.command(:pandora) do |event|
@@ -102,15 +126,16 @@ $bot.command(:playmusic) do |event|
 				$playlist.play(event)
 		else
 				event.respond "Nothing Queued,"
-				 start_pianobarfly(event)
+				$pandora = Pandora.new
+				$pandora.writeconfig(event)
+				 $pandora.start(event)
 				 sleep 5
-				 #Dir.chdir("#{$root_dir}/mp3")
-				 $pandoraplaying = true
-				 until $pandoraplaying == false do
-					 play_newest_file(event, "mp3")
+				 $pandora.playing = true
+				 until $pandora.playing == false do
+					 $pandora.play(event)
 					 if $playlist.entries.empty? == false
-						 stop_pianobarfly(event)
-						 $pandoraplaying = false
+						 $pandora.stop(event)
+						 $pandora.playing = false
 					 end
 				 end
 		 	end
@@ -118,8 +143,8 @@ $bot.command(:playmusic) do |event|
 end
 
 $bot.command(:youtubeobject) do |event, text|
-	youtube_to_object(text)
-	event.respond "Added #{$playlist.entries.last.name} [#{$playlist.entries.last.length}] to playlist."
+	youtube_to_object(event, text)
+	event.respond "#{$playlist.entries.last.name} [#{$playlist.entries.last.length}] to playlist."
 end
 $bot.command(:playobject) do |event|
 	$playlist.play(event)
