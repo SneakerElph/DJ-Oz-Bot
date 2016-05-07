@@ -51,7 +51,7 @@ $bot.command(:stop) do |event|
 		$pandora.running = false
 		$pandora.playing = false
 	end
-
+	$bot.game=("Nothing.")
 	nil
 end
 
