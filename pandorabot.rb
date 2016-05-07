@@ -8,7 +8,6 @@ require 'yt'
 require 'youtube-dl.rb'
 
 def youtube_to_object(event, url)
-	#Dir.chdir ("#{$root_dir}/playlist")
 	youtubeVideo = Yt::Video.new url: url
 	videoid = url.gsub("https://www.youtube.com/watch?v=", "")
 	YoutubeDL.download url, output: "#{$root_dir}/playlist/#{videoid}"
@@ -22,9 +21,10 @@ $root_dir=Dir.pwd
 $current_voice_channel = ENV['current_voice_channel']
 $bot = Discordrb::Commands::CommandBot.new token: ENV['discord_token'], application_id: ENV['application_id'], prefix: ENV['prefix']
 $pandora = Pandora.new
+$playlist = Playlist.new
 
 $bot.command(:channels) do |event|
-	 event.respond 'Pong! Check these channels and ID\'s'
+	 event.respond 'Check these channels and ID\'s'
 	 server_channels = event.server.channels
 	 for i in server_channels
 		 event.respond "#{i.name}: #{i.id}'"
@@ -55,14 +55,6 @@ $bot.command(:stop) do |event|
 	nil
 end
 
-$bot.command(:playnewest) do |event|
-	$songplaying = true
-	Dir.chdir("#{$root_dir}/mp3")
-	until $songplaying == false do
-			play_newest_file(event)
-		end
-end
-
 $bot.command(:startpandora) do |event|
 	$pandora.writeconfig(event)
 	$pandora.start(event)
@@ -87,7 +79,7 @@ $bot.command(:stoppandora) do |event|
 	$pandora.stop(event)
 end
 
-$bot.command(:pandora) do |event|
+$bot.command(:playpandora) do |event|
 	start_pianobarfly(event)
 	sleep 5
 	$songplaying = true
@@ -97,28 +89,10 @@ $bot.command(:pandora) do |event|
 	end
 end
 
-$bot.command(:changestation) do |event|
-	change_station(event)
-end
-
-$bot.command(:writeconfig) do |event|
-	write_pianobar_config()
-end
-
-$bot.command(:youtube) do |event, text|
-	download_youtube(text)
-end
-
-$bot.command(:playplaylist) do |event|
-	Dir.chdir("#{$root_dir}/mp3")
-	play_playlist(event)
-end
-
 $bot.command(:playmusic) do |event|
 	#check if there's stuff in playlist folder
 	#if not, start pianobarfly and play pandora
 	#after every song check playlist folder again
-
 
 	$musicplaying = true
 	until $musicplaying == false
@@ -142,16 +116,17 @@ $bot.command(:playmusic) do |event|
 		end
 end
 
-$bot.command(:youtubeobject) do |event, text|
+$bot.command(:addsong) do |event, text|
 	youtube_to_object(event, text)
 	event.respond "#{$playlist.entries.last.name} [#{$playlist.entries.last.length}] to playlist."
 end
-$bot.command(:playobject) do |event|
+
+$bot.command(:playsong) do |event|
 	$playlist.play(event)
 	nil
 end
 
-$bot.command(:list) do |event|
+$bot.command(:playlist) do |event|
 	if $playlist.entries.empty?
 		event.respond "Nothing in the list."
 	else
@@ -162,8 +137,8 @@ $bot.command(:list) do |event|
 
 	nil
 end
-$playlist = Playlist.new
-	puts "Invite URL = #{$bot.invite_url}"
+
+puts "Invite URL = #{$bot.invite_url}"
 
 #RUN THE BOT
 $bot.run

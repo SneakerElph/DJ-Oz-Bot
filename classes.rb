@@ -1,5 +1,3 @@
-
-
 class Song
   attr_accessor :name, :artist, :length, :filename, :origin, :requester
     def initialize(name, artist, length, filename, origin, requester)
@@ -93,12 +91,12 @@ class Pandora
   		puts "found Pianobarfly in current directory"
   		#@writeconfig(event)
   		@pianobarfly = IO.popen("./pianobarfly", 'r+')
-  		event.respond "Starting Pianobarfly..."
+  		event.respond "Starting Pandora..."
   	else
   		puts "didn't find Pianobarfly in current directory, playing from \$PATH"
   		#@writeconfig(event)
   	  @pianobarfly = IO.popen("pianobarfly", 'r+')
-  	  event.respond "Starting Pianobarfly..."
+  	  event.respond "Starting Pandora..."
   	end
     @running = true
   end
@@ -107,7 +105,7 @@ class Pandora
       @running = false
       event.voice.stop_playing
       @pianobarfly.print 'q'
-      event.respond "Pianobarfly stopped."
+      event.respond "Pandora stopped."
   end
   def writeconfig(event)
     pianobarflyconfigfile = File.new("#{Dir.home}/.config/pianobarfly/config", "w+")
