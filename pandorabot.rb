@@ -18,7 +18,7 @@ def youtube_to_object(event, url)
 	time_until_played = $playlist.length_unplayed - songObject.length
 end
 
-Yt.configuration.api_key = "AIzaSyBN1naP86mILKIrtuazW75JGB4wpS2nSMw"
+Yt.configuration.api_key = youtubeAPIKey
 $root_dir=Dir.pwd
 $current_voice_channel = ENV['current_voice_channel']
 $bot = Discordrb::Commands::CommandBot.new token: ENV['discord_token'], application_id: ENV['application_id'], prefix: ENV['prefix']
