@@ -10,10 +10,12 @@ require 'youtube-dl.rb'
 def youtube_to_object(event, url)
 	youtubeVideo = Yt::Video.new url: url
 	videoid = url.gsub("https://www.youtube.com/watch?v=", "")
-	YoutubeDL.download url, output: "#{$root_dir}/playlist/#{videoid}"
-	filename = Dir["#{$root_dir}/playlist/#{videoid}*"]
-	songObject = Song.new("#{youtubeVideo.title}", "artist", "#{Time.at(youtubeVideo.duration).utc.strftime("%M:%S")}", "#{filename[0]}", "youtube", "#{event.author.name}")
+	event.respond "Downloading #{youtubeVideo.title}"
+	YoutubeDL.download url, output: "#{$root_dir}/playlist/#{youtubeVideo.title}"
+	filename = Dir["#{$root_dir}/playlist/#{youtubeVideo.title}*"]
+	songObject = Song.new("#{youtubeVideo.title}", "artist", "#{youtubeVideo.duration}".to_i, "#{filename[0]}", "youtube", "#{event.author.name}")
 	$playlist.add(songObject)
+	time_until_played = $playlist.length_unplayed - songObject.length
 end
 
 Yt.configuration.api_key = "AIzaSyBN1naP86mILKIrtuazW75JGB4wpS2nSMw"
@@ -93,10 +95,13 @@ $bot.command(:playmusic) do |event|
 	#check if there's stuff in playlist folder
 	#if not, start pianobarfly and play pandora
 	#after every song check playlist folder again
-
+if $musicplaying == true
+	event.respond "Music is already playing."
+	break
+end
 	$musicplaying = true
 	until $musicplaying == false
-		if $playlist.entries.empty? == false
+		if $playlist.empty == false
 				$playlist.play(event)
 		else
 				event.respond "Nothing Queued,"
@@ -107,7 +112,7 @@ $bot.command(:playmusic) do |event|
 				 $pandora.playing = true
 				 until $pandora.playing == false do
 					 $pandora.play(event)
-					 if $playlist.entries.empty? == false
+					 if $playlist.empty == false
 						 $pandora.stop(event)
 						 $pandora.playing = false
 					 end
@@ -117,8 +122,9 @@ $bot.command(:playmusic) do |event|
 end
 
 $bot.command(:addsong) do |event, text|
-	youtube_to_object(event, text)
-	event.respond "#{$playlist.entries.last.name} [#{$playlist.entries.last.length}] to playlist."
+	$voicebot = $bot.voice_connect($current_voice_channel)
+	time_until_played = youtube_to_object(event, text)
+	event.respond "Added **#{$playlist.entries.last.name} [#{Time.at($playlist.entries.last.length).utc.strftime("%M:%S")}]** to playlist. Time until played: **#{Time.at(time_until_played - $voicebot.stream_time.to_i).utc.strftime("%M:%S")}**"
 end
 
 $bot.command(:playsong) do |event|
@@ -127,18 +133,23 @@ $bot.command(:playsong) do |event|
 end
 
 $bot.command(:playlist) do |event|
+	message = ""
 	if $playlist.entries.empty?
 		event.respond "Nothing in the list."
 	else
 			for e in $playlist.entries do
-				event.respond "#{e.name}"
+				if e.played == true
+					message = message + "*#{e.name} - [#{Time.at(e.length).utc.strftime("%M:%S")}] - Requested by* ***#{e.requester}***\n"
+				else
+					message = message + "#{e.name} - **[#{Time.at(e.length).utc.strftime("%M:%S")}]** - Requested by **#{e.requester}**\n"
+				end
 			end
-		end
-
+		event.respond "#{message}\n**Total time left to play: #{Time.at($playlist.length_unplayed - $voicebot.stream_time.to_i).utc.strftime("%M:%S")}**"
+	end
 	nil
 end
 
 puts "Invite URL = #{$bot.invite_url}"
-
+#$bot.game=("Nothing.")
 #RUN THE BOT
 $bot.run

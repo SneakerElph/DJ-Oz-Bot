@@ -1,5 +1,5 @@
 class Song
-  attr_accessor :name, :artist, :length, :filename, :origin, :requester
+  attr_accessor :name, :artist, :length, :filename, :origin, :requester, :played
     def initialize(name, artist, length, filename, origin, requester)
       @name = name
       @artist = artist
@@ -7,6 +7,7 @@ class Song
       @filename = filename
       @origin = origin
       @requester = requester
+      @played = false
     end
     def play(event)
       $bot.game=("#{@name} by #{@artist}")
@@ -26,16 +27,47 @@ class Playlist
   def initialize
     @entries = Array.new
   end
+
   def play(event)
-    voicebot = $bot.voice_connect($current_voice_channel)
+    #voicebot = $bot.voice_connect($current_voice_channel)
     for entry in @entries do
-      entry.play(event)
-      entry.delete(event)
-      @entries.delete_at(0)
+      if entry.played == false
+        entry.play(event)
+        entry.played = true
+      end
+      #entry.delete(event)
+      #@entries.delete_at(0)
     end
   end
+
   def add(song)
     @entries.push(song)
+  end
+
+  def empty
+    for entry in @entries do
+      if entry.played == false
+        return false
+        break
+      end
+    end
+  end
+
+  def length_unplayed
+    length = 0
+    for entry in @entries do
+      if entry.played == false
+        length = length + entry.length
+      end
+    end
+    return length
+  end
+  def length_total
+    length = 0
+    for entry in @entries do
+      legnth = length + entry.length
+    end
+    return length
   end
 end
 
