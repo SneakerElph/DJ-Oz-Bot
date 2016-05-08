@@ -24,6 +24,7 @@ $current_voice_channel = ENV['current_voice_channel']
 $bot = Discordrb::Commands::CommandBot.new token: ENV['discord_token'], application_id: ENV['application_id'], prefix: ENV['prefix']
 $pandora = Pandora.new
 $playlist = Playlist.new
+$botvolume = 0.5
 
 $bot.command(:channels) do |event|
 	 event.respond 'Check these channels and ID\'s'
@@ -147,6 +148,10 @@ $bot.command(:playlist) do |event|
 		event.respond "#{message}\n**Total time left to play: #{Time.at($playlist.length_unplayed - $voicebot.stream_time.to_i).utc.strftime("%M:%S")}**"
 	end
 	nil
+end
+$bot.command(:clear) do |event|
+		$playlist.clear
+		event.respond "Playlist cleared."
 end
 
 puts "Invite URL = #{$bot.invite_url}"

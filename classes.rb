@@ -12,6 +12,7 @@ class Song
     def play(event)
       $bot.game=("#{@name} by #{@artist}")
       voicebot = $bot.voice_connect($current_voice_channel)
+      voicebot.volume = $botvolume
       #event.respond "Now Playing: #{@name} [#{Time.at(@length).utc.strftime("%M:%S")}]. Filename: #{@filename}"
       event.respond "Now Playing: **#{@name}**. Requested by **#{@requester}**"
       event.voice.play_file("#{@filename}")
@@ -69,6 +70,9 @@ class Playlist
     end
     return length
   end
+  def clear
+      @entries.clear
+  end
 end
 
 class Pandora
@@ -101,6 +105,7 @@ class Pandora
       	@currentfilename = sorted_list[0]
       #create the all-powerful VOICEBOT
     	 voicebot = $bot.voice_connect($current_voice_channel)
+       voicebot.volume = $botvolume
       #show me the list because I don't trust you did it correctly
     	 puts sorted_list
       #Set the "Now Playing" part of the bot to be the filename with any underscores replaced with spaces
