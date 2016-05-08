@@ -1,1 +1,1 @@
-# PandoraBot
+# DJ Oz Bot
