@@ -9,6 +9,7 @@ class Song
       @requester = requester
       @played = false
     end
+
     def play(event)
       $bot.game=("#{@name} by #{@artist}")
       voicebot = $bot.voice_connect($current_voice_channel)
@@ -17,10 +18,12 @@ class Song
       event.respond "Now Playing: **#{@name}**. Requested by **#{@requester}**"
       event.voice.play_file("#{@filename}")
     end
+
     def delete(event)
       File.delete("#{@filename}")
       puts "deleting #{@filename}"
     end
+
 end
 
 class Playlist
@@ -63,20 +66,23 @@ class Playlist
     end
     return length
   end
+
   def length_total
     length = 0
     for entry in @entries do
       legnth = length + entry.length
     end
+
     return length
   end
+
   def clear
       @entries.clear
   end
 end
 
 class Pandora
-  attr_accessor :name, :artist, :running, :playing, :currentfilename, :user, :station_id
+  attr_accessor :name, :artist, :running, :playing, :currentfilename, :user, :station_id,
   def initialize()
     @name = name #name of the song currently playing
     @artist = artist #name of artist currently playing
@@ -90,6 +96,7 @@ class Pandora
     @tls_fingerprint = ENV['pandora_tls_fingerprint'] #TLS fingerprint. Also in config.rb
     @audio_filename = ENV['pandora_audio_file_name'] #The format the audio files will be named in. Used for scraping @name and @artist
   end
+
   def play(event)
     #@playing = true
     #until @playing == false
@@ -120,6 +127,7 @@ class Pandora
     	 $bot.game=("Nothing.")
      #end
   end
+
   def start(event)
     #check if pianobarfly is in our current folder
   	Dir.chdir("#{$root_dir}")
@@ -142,8 +150,16 @@ class Pandora
       @running = false
       event.voice.stop_playing
       @pianobarfly.print 'q'
-      event.respond "Pandora stopped."
   end
+
+  def pause_pianobarfly
+    @pianobarfly.print 'S'
+  end
+
+  def resume_pianobarfly
+    @pianobarfly.print 'P'
+  end
+
   def writeconfig(event)
     pianobarflyconfigfile = File.new("#{Dir.home}/.config/pianobarfly/config", "w+")
       pianobarflyconfigfile.puts("user = #{@user}")
@@ -154,5 +170,10 @@ class Pandora
       pianobarflyconfigfile.puts("audio_file_name = #{@audio_filename}")
     pianobarflyconfigfile.close
     puts "wrote Pianobarfly config"
+  end
+
+  def skip
+    @pianobarfly.print 'n'
+    puts "Skipping Pandora song..."
   end
 end

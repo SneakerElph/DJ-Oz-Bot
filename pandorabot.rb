@@ -18,7 +18,7 @@ def youtube_to_object(event, url)
 	time_until_played = $playlist.length_unplayed - songObject.length
 end
 
-Yt.configuration.api_key = youtubeAPIKey
+Yt.configuration.api_key = $youtubeAPIKey
 $root_dir=Dir.pwd
 $current_voice_channel = ENV['current_voice_channel']
 $bot = Discordrb::Commands::CommandBot.new token: ENV['discord_token'], application_id: ENV['application_id'], prefix: ENV['prefix']
@@ -37,12 +37,17 @@ end
 
 $bot.command(:pause) do |event|
 	event.voice.pause
+	if $pandora.playing == true
+		$pandora.pause_pianobarfly
+	end
 	nil
 end
 
 $bot.command(:resume) do |event|
 	event.voice.continue
-	nil
+	if $pandora.playing == true
+		$pandora.resume_pianobarfly
+	end
 end
 
 $bot.command(:stop) do |event|
@@ -107,7 +112,7 @@ end
 		else
 				event.respond "Nothing Queued,"
 				$pandora = Pandora.new
-				$pandora.writeconfig(event)
+				#$pandora.writeconfig(event)
 				 $pandora.start(event)
 				 sleep 5
 				 $pandora.playing = true
@@ -115,6 +120,7 @@ end
 					 $pandora.play(event)
 					 if $playlist.empty == false
 						 $pandora.stop(event)
+						 event.respond "Pandora stopped."
 						 $pandora.playing = false
 					 end
 				 end
@@ -149,9 +155,28 @@ $bot.command(:playlist) do |event|
 	end
 	nil
 end
+
 $bot.command(:clear) do |event|
 		$playlist.clear
 		event.respond "Playlist cleared."
+end
+
+$bot.command(:skip) do |event|
+	if $pandora.playing == true
+		#event.voice.pause
+		#event.respond "Skipping Pandora song..."
+		#$pandora.skip
+		#sleep 2
+		#event.voice.stop_playing
+		event.respond "Can't skip Pandora songs."
+	else
+		event.voice.stop_playing
+	end
+	#$pandora.skip(event)
+	#event.respond "Skipping Pandora..."
+	#sleep 5
+	#$pandora.play(event)
+	nil
 end
 
 puts "Invite URL = #{$bot.invite_url}"
